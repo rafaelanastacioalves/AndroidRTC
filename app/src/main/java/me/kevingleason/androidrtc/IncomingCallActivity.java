@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,7 +14,6 @@ import android.widget.Toast;
 import com.pubnub.api.Callback;
 import com.pubnub.api.Pubnub;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import me.kevingleason.androidrtc.util.Constants;
@@ -21,6 +21,7 @@ import me.kevingleason.pnwebrtc.PnPeerConnectionClient;
 
 
 public class IncomingCallActivity extends Activity {
+    private final String LOG_TAG = getClass().getSimpleName();
     private SharedPreferences mSharedPreferences;
     private String username;
     private String callUser;
@@ -30,6 +31,7 @@ public class IncomingCallActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i(LOG_TAG,"onCreate: Start...");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_incoming_call);
 
@@ -56,7 +58,13 @@ public class IncomingCallActivity extends Activity {
         this.mCallerID.setText(this.callUser);
 
         this.mPubNub  = new Pubnub(Constants.PUB_KEY, Constants.SUB_KEY);
+        Log.i(LOG_TAG,"new pubNub");
+
         this.mPubNub.setUUID(this.username);
+        Log.i(LOG_TAG,"setUUID");
+
+        Log.i(LOG_TAG,"onCreate: ...End");
+
     }
 
 

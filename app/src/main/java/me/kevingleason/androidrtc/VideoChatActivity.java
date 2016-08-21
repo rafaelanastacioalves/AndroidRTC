@@ -1,12 +1,10 @@
 package me.kevingleason.androidrtc;
 
-import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,7 +20,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
-import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
 import org.webrtc.PeerConnection;
 import org.webrtc.PeerConnectionFactory;
@@ -55,6 +52,7 @@ public class VideoChatActivity extends ListActivity {
     public static final String VIDEO_TRACK_ID = "videoPN";
     public static final String AUDIO_TRACK_ID = "audioPN";
     public static final String LOCAL_MEDIA_STREAM_ID = "localStreamPN";
+    private final String LOG_TAG = getClass().getSimpleName();
 
     private PnRTCClient pnRTCClient;
     private VideoSource localVideoSource;
@@ -72,6 +70,8 @@ public class VideoChatActivity extends ListActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i(LOG_TAG,"onCreate...");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_chat);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -95,6 +95,8 @@ public class VideoChatActivity extends ListActivity {
         mChatAdapter = new ChatAdapter(this, ll);
         mChatList.setAdapter(mChatAdapter);
 
+        Log.i(LOG_TAG,"PeerConnectionFactory.initializeAndroidGlobals");
+
         // First, we initiate the PeerConnectionFactory with our application context and some options.
         PeerConnectionFactory.initializeAndroidGlobals(
                 this,  // Context
@@ -103,6 +105,7 @@ public class VideoChatActivity extends ListActivity {
                 true,  // Hardware Acceleration Enabled
                 null); // Render EGL Context
 
+        Log.i(LOG_TAG,"new PeerConnectionFactory");
         PeerConnectionFactory pcFactory = new PeerConnectionFactory();
         this.pnRTCClient = new PnRTCClient(Constants.PUB_KEY, Constants.SUB_KEY, this.username);
         List<PeerConnection.IceServer> servers = getXirSysIceServers();
@@ -163,6 +166,8 @@ public class VideoChatActivity extends ListActivity {
             String callUser = extras.getString(Constants.CALL_USER, "");
             connectToUser(callUser);
         }
+        Log.i(LOG_TAG,"... onCreate");
+
     }
 
     @Override
