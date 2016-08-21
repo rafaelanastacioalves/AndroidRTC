@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "20.0.0"
+    buildToolsVersion '23.0.3'
 
     defaultConfig {
         applicationId "me.kevingleason.androidrtc"
@@ -13,7 +13,7 @@ android {
     }
     buildTypes {
         release {
-            runProguard false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -26,8 +26,8 @@ repositories {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.pubnub:pubnub-android:3.7.4'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile group: 'com.pubnub', name: 'pubnub', version: '4.0.8'
     compile 'io.pristine:libjingle:9694@aar'
     compile project(':pnwebrtc')
 }
