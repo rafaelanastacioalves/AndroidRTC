@@ -107,16 +107,26 @@ public class VideoChatActivity extends ListActivity {
 
         Log.i(LOG_TAG,"new PeerConnectionFactory");
         PeerConnectionFactory pcFactory = new PeerConnectionFactory();
+
+        Log.i(LOG_TAG,"pnRTCClient...");
         this.pnRTCClient = new PnRTCClient(Constants.PUB_KEY, Constants.SUB_KEY, this.username);
+
+        Log.i(LOG_TAG,"getXirSysIceServers");
         List<PeerConnection.IceServer> servers = getXirSysIceServers();
         if (!servers.isEmpty()){
+            Log.i(LOG_TAG,"server not empty");
+            Log.i(LOG_TAG,"setSignalParams");
             this.pnRTCClient.setSignalParams(new PnSignalingParams());
         }
 
+
+
         // Returns the number of cams & front/back face device name
+        Log.i(LOG_TAG,"local video code");
         int camNumber = VideoCapturerAndroid.getDeviceCount();
         String frontFacingCam = VideoCapturerAndroid.getNameOfFrontFacingDevice();
         String backFacingCam = VideoCapturerAndroid.getNameOfBackFacingDevice();
+
 
         // Creates a VideoCapturerAndroid instance for the device name
         VideoCapturer capturer = VideoCapturerAndroid.create(frontFacingCam);
@@ -125,14 +135,17 @@ public class VideoChatActivity extends ListActivity {
         localVideoSource = pcFactory.createVideoSource(capturer, this.pnRTCClient.videoConstraints());
         VideoTrack localVideoTrack = pcFactory.createVideoTrack(VIDEO_TRACK_ID, localVideoSource);
 
+        Log.i(LOG_TAG,"local audio code");
         // First we create an AudioSource then we can create our AudioTrack
         AudioSource audioSource = pcFactory.createAudioSource(this.pnRTCClient.audioConstraints());
         AudioTrack localAudioTrack = pcFactory.createAudioTrack(AUDIO_TRACK_ID, audioSource);
 
+        Log.i(LOG_TAG,"video renderer part");
         // To create our VideoRenderer, we can use the included VideoRendererGui for simplicity
         // First we need to set the GLSurfaceView that it should render to
         this.videoView = (GLSurfaceView) findViewById(R.id.gl_surface);
 
+        Log.i(LOG_TAG,"VideoRendererGui.setView");
         // Then we set that view, and pass a Runnable to run once the surface is ready
         VideoRendererGui.setView(videoView, null);
 
@@ -145,25 +158,33 @@ public class VideoChatActivity extends ListActivity {
         //  Note that LOCAL_MEDIA_STREAM_ID can be any string
         MediaStream mediaStream = pcFactory.createLocalMediaStream(LOCAL_MEDIA_STREAM_ID);
 
+
         // Now we can add our tracks.
+        Log.i(LOG_TAG,"adding tracks");
         mediaStream.addTrack(localVideoTrack);
         mediaStream.addTrack(localAudioTrack);
 
+        Log.i(LOG_TAG,"attach RTC Listener to PubNub Client");
         // First attach the RTC Listener so that callback events will be triggered
         this.pnRTCClient.attachRTCListener(new DemoRTCListener());
 
         // Then attach your local media stream to the PnRTCClient.
         //  This will trigger the onLocalStream callback.
+
+        Log.i(LOG_TAG,"attachLocalMediaStream");
         this.pnRTCClient.attachLocalMediaStream(mediaStream);
 
+        Log.i(LOG_TAG,"listen on a channel");
         // Listen on a channel. This is your "phone number," also set the max chat users.
         this.pnRTCClient.listenOn("Kevin");
         this.pnRTCClient.setMaxConnections(1);
+
 
         // If the intent contains a number to dial, call it now that you are connected.
         //  Else, remain listening for a call.
         if (extras.containsKey(Constants.CALL_USER)) {
             String callUser = extras.getString(Constants.CALL_USER, "");
+            Log.i(LOG_TAG,"connecting to user");
             connectToUser(callUser);
         }
         Log.i(LOG_TAG,"... onCreate");
@@ -201,6 +222,8 @@ public class VideoChatActivity extends ListActivity {
 
     @Override
     protected void onResume() {
+        Log.i(LOG_TAG,"onResume");
+
         super.onResume();
         this.videoView.onResume();
         this.localVideoSource.restart();
@@ -209,6 +232,7 @@ public class VideoChatActivity extends ListActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.i(LOG_TAG,"onDestroy");
         if (this.localVideoSource != null) {
             this.localVideoSource.stop();
         }
@@ -240,6 +264,7 @@ public class VideoChatActivity extends ListActivity {
     }
 
     public List<PeerConnection.IceServer> getXirSysIceServers(){
+        Log.i(LOG_TAG,"getXirSysIceServers...");
         List<PeerConnection.IceServer> servers = new ArrayList<PeerConnection.IceServer>();
         try {
             servers = new XirSysRequest().execute().get();
@@ -248,6 +273,7 @@ public class VideoChatActivity extends ListActivity {
         }catch (ExecutionException e){
             e.printStackTrace();
         }
+        Log.i(LOG_TAG,"...getXirSysIceServers");
         return servers;
     }
 
@@ -294,8 +320,12 @@ public class VideoChatActivity extends ListActivity {
      * DemoRTC is just a Log Listener with the added functionality to append screens.
      */
     private class DemoRTCListener extends LogRTCListener {
+
+        private final String LOG_TAG = getClass().getSimpleName();
         @Override
         public void onLocalStream(final MediaStream localStream) {
+            Log.i(LOG_TAG,"onLocalStream");
+
             super.onLocalStream(localStream); // Will log values
             VideoChatActivity.this.runOnUiThread(new Runnable() {
                 @Override
@@ -308,6 +338,7 @@ public class VideoChatActivity extends ListActivity {
 
         @Override
         public void onAddRemoteStream(final MediaStream remoteStream, final PnPeer peer) {
+            Log.i(LOG_TAG,"onAddRemoteStream");
             super.onAddRemoteStream(remoteStream, peer); // Will log values
             VideoChatActivity.this.runOnUiThread(new Runnable() {
                 @Override
@@ -327,6 +358,7 @@ public class VideoChatActivity extends ListActivity {
 
         @Override
         public void onMessage(PnPeer peer, Object message) {
+            Log.i(LOG_TAG,"onMessage");
             super.onMessage(peer, message);  // Will log values
             if (!(message instanceof JSONObject)) return; //Ignore if not JSONObject
             JSONObject jsonMsg = (JSONObject) message;
@@ -348,6 +380,7 @@ public class VideoChatActivity extends ListActivity {
 
         @Override
         public void onPeerConnectionClosed(PnPeer peer) {
+            Log.i(LOG_TAG,"onPeerConnectionClosed");
             super.onPeerConnectionClosed(peer);
             VideoChatActivity.this.runOnUiThread(new Runnable() {
                 @Override
