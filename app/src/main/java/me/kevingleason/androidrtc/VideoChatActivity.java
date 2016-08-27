@@ -159,6 +159,7 @@ public class VideoChatActivity extends ListActivity {
         MediaStream mediaStream = pcFactory.createLocalMediaStream(LOCAL_MEDIA_STREAM_ID);
 
 
+
         // Now we can add our tracks.
         Log.i(LOG_TAG,"adding tracks");
         mediaStream.addTrack(localVideoTrack);
@@ -174,9 +175,69 @@ public class VideoChatActivity extends ListActivity {
         Log.i(LOG_TAG,"attachLocalMediaStream");
         this.pnRTCClient.attachLocalMediaStream(mediaStream);
 
+//        // this is used to send stream to remote...
+//        PeerConnection peerConnection = pcFactory.createPeerConnection(servers, pnRTCClient.pcConstraints(), new PeerConnection.Observer() {
+//            private final String LOG_TAG = getClass().getSimpleName();
+//            @Override
+//            public void onSignalingChange(PeerConnection.SignalingState signalingState) {
+//            }
+//
+//            @Override
+//            public void onIceConnectionChange(PeerConnection.IceConnectionState iceConnectionState) {
+//                Log.i(LOG_TAG,"onSignalingChange");
+//
+//            }
+//
+//            @Override
+//            public void onIceConnectionReceivingChange(boolean b) {
+//                Log.i(LOG_TAG,"onIceConnectionReceivingChange");
+//
+//            }
+//
+//            @Override
+//            public void onIceGatheringChange(PeerConnection.IceGatheringState iceGatheringState) {
+//                Log.i(LOG_TAG,"onIceGatheringChange");
+//
+//            }
+//
+//            @Override
+//            public void onIceCandidate(IceCandidate iceCandidate) {
+//                Log.i(LOG_TAG,"onIceCandidate");
+//
+//            }
+//
+//            @Override
+//            public void onAddStream(MediaStream mediaStream) {
+//                Log.i(LOG_TAG,"onAddStream");
+//
+//            }
+//
+//            @Override
+//            public void onRemoveStream(MediaStream mediaStream) {
+//                Log.i(LOG_TAG,"onRemoveStream");
+//
+//            }
+//
+//            @Override
+//            public void onDataChannel(DataChannel dataChannel) {
+//                Log.i(LOG_TAG,"onDataChannel");
+//
+//            }
+//
+//            @Override
+//            public void onRenegotiationNeeded() {
+//                Log.i(LOG_TAG,"onRenegotiationNeeded");
+//
+//            }
+//        });
+//
+//        peerConnection.addStream(mediaStream);
+
         Log.i(LOG_TAG,"listen on a channel");
         // Listen on a channel. This is your "phone number," also set the max chat users.
-        this.pnRTCClient.listenOn("Kevin");
+
+        //// TODO: 26/08/16 Change this Kevin...
+        this.pnRTCClient.listenOn(username);
         this.pnRTCClient.setMaxConnections(1);
 
 
@@ -330,8 +391,12 @@ public class VideoChatActivity extends ListActivity {
             VideoChatActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if(localStream.videoTracks.size()==0) return;
-                    localStream.videoTracks.get(0).addRenderer(new VideoRenderer(localRender));
+                    if(localStream.videoTracks.size()==0) {
+                        Log.e(LOG_TAG,"Sem local streams!" );
+                        return;
+                    }else{
+                        localStream.videoTracks.get(0).addRenderer(new VideoRenderer(localRender));
+                    }
                 }
             });
         }
@@ -339,7 +404,6 @@ public class VideoChatActivity extends ListActivity {
         @Override
         public void onAddRemoteStream(final MediaStream remoteStream, final PnPeer peer) {
             Log.i(LOG_TAG,"onAddRemoteStream");
-            super.onAddRemoteStream(remoteStream, peer); // Will log values
             VideoChatActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -354,6 +418,8 @@ public class VideoChatActivity extends ListActivity {
                     catch (Exception e){ e.printStackTrace(); }
                 }
             });
+            super.onAddRemoteStream(remoteStream, peer); // Will log values
+
         }
 
         @Override
