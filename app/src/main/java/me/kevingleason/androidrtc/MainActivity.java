@@ -180,6 +180,8 @@ public class MainActivity extends ListActivity {
     public void dispatchCall(final String callNum){
         final String callNumStdBy = callNum + Constants.STDBY_SUFFIX;
         this.mPubNub.hereNow(callNumStdBy, new Callback() {
+            public final String LOG_TAG = getClass().getSimpleName();
+
             @Override
             public void successCallback(String channel, Object message) {
                 Log.d("MA-dC", "HERE_NOW: " +" CH - " + callNumStdBy + " " + message.toString());
@@ -197,6 +199,8 @@ public class MainActivity extends ListActivity {
                         public void successCallback(String channel, Object message) {
                             Log.d("MA-dC", "SUCCESS: " + message.toString());
                             Intent intent = new Intent(MainActivity.this, VideoChatActivity.class);
+                            Log.i(LOG_TAG, "Putting Extra USER_NAME: " + username);
+                            Log.i(LOG_TAG, "Putting Extra CALL_USER: " + callNum);
                             intent.putExtra(Constants.USER_NAME, username);
                             intent.putExtra(Constants.CALL_USER, callNum);  // Only accept from this number?
                             startActivity(intent);

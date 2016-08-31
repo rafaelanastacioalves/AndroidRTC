@@ -18,6 +18,7 @@ import org.json.JSONObject;
 
 import me.kevingleason.androidrtc.util.Constants;
 import me.kevingleason.pnwebrtc.PnPeerConnectionClient;
+import me.kevingleason.pnwebrtc.PnRTCClient;
 
 
 public class IncomingCallActivity extends Activity {
@@ -28,6 +29,7 @@ public class IncomingCallActivity extends Activity {
 
     private Pubnub mPubNub;
     private TextView mCallerID;
+    private PnRTCClient pnRTCClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +45,10 @@ public class IncomingCallActivity extends Activity {
             return;
         }
         this.username = this.mSharedPreferences.getString(Constants.USER_NAME, "");
-
+        pnRTCClient = new PnRTCClient(Constants.PUB_KEY, Constants.SUB_KEY, this.username);
         Bundle extras = getIntent().getExtras();
+
+
         if (extras==null || !extras.containsKey(Constants.CALL_USER)){
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
