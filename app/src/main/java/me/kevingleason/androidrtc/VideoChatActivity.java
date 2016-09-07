@@ -245,7 +245,7 @@ public class VideoChatActivity extends ListActivity {
         //  Else, remain listening for a call.
         if (extras.containsKey(Constants.CALL_USER)) {
             String callUser = extras.getString(Constants.CALL_USER, "");
-            Log.i(LOG_TAG,"connecting to user");
+            Log.i(LOG_TAG,"connecting to user " + callUser);
             connectToUser(callUser);
         }
         Log.i(LOG_TAG,"... onCreate");

@@ -34,7 +34,6 @@ public class IncomingCallActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(LOG_TAG,"onCreate: Start...");
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_incoming_call);
 
         this.mSharedPreferences = getSharedPreferences(Constants.SHARED_PREFS, MODE_PRIVATE);
@@ -45,7 +44,6 @@ public class IncomingCallActivity extends Activity {
             return;
         }
         this.username = this.mSharedPreferences.getString(Constants.USER_NAME, "");
-        pnRTCClient = new PnRTCClient(Constants.PUB_KEY, Constants.SUB_KEY, this.username);
         Bundle extras = getIntent().getExtras();
 
 
@@ -68,6 +66,8 @@ public class IncomingCallActivity extends Activity {
         Log.i(LOG_TAG,"setUUID");
 
         Log.i(LOG_TAG,"onCreate: ...End");
+        super.onCreate(savedInstanceState);
+
 
     }
 
