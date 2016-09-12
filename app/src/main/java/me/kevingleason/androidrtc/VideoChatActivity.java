@@ -111,13 +111,13 @@ public class VideoChatActivity extends ListActivity {
         Log.i(LOG_TAG,"pnRTCClient...");
         this.pnRTCClient = new PnRTCClient(Constants.PUB_KEY, Constants.SUB_KEY, this.username);
 
-        Log.i(LOG_TAG,"getXirSysIceServers");
-        List<PeerConnection.IceServer> servers = getXirSysIceServers();
-        if (!servers.isEmpty()){
-            Log.i(LOG_TAG,"server not empty");
-            Log.i(LOG_TAG,"setSignalParams");
-            this.pnRTCClient.setSignalParams(new PnSignalingParams());
-        }
+//        Log.i(LOG_TAG,"getXirSysIceServers");
+//        List<PeerConnection.IceServer> servers = getXirSysIceServers();
+//        if (!servers.isEmpty()){
+//            Log.i(LOG_TAG,"server not empty");
+//            Log.i(LOG_TAG,"setSignalParams");
+//            this.pnRTCClient.setSignalParams(new PnSignalingParams());
+//        }
 
 
 
@@ -129,7 +129,7 @@ public class VideoChatActivity extends ListActivity {
 
 
         // Creates a VideoCapturerAndroid instance for the device name
-        VideoCapturer capturer = VideoCapturerAndroid.create(frontFacingCam);
+        VideoCapturer capturer = VideoCapturerAndroid.create(backFacingCam);
 
         // First create a Video Source, then we can make a Video Track
         localVideoSource = pcFactory.createVideoSource(capturer, this.pnRTCClient.videoConstraints());
@@ -286,8 +286,8 @@ public class VideoChatActivity extends ListActivity {
         Log.i(LOG_TAG,"onResume");
 
         super.onResume();
-        this.videoView.onResume();
-        this.localVideoSource.restart();
+//        this.videoView.onResume();
+//        this.localVideoSource.restart();
     }
 
     @Override

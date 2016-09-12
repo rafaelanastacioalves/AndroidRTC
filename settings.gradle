@@ -1,1 +1,1 @@
-include ':app', ':pnwebrtc'
+include ':app'
