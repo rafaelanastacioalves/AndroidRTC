@@ -179,38 +179,54 @@ public class MainActivity extends ListActivity {
      */
     public void dispatchCall(final String callNum){
         final String callNumStdBy = callNum + Constants.STDBY_SUFFIX;
-        this.mPubNub.hereNow(callNumStdBy, new Callback() {
-            public final String LOG_TAG = getClass().getSimpleName();
-
-            @Override
-            public void successCallback(String channel, Object message) {
-                Log.d("MA-dC", "HERE_NOW: " +" CH - " + callNumStdBy + " " + message.toString());
-                try {
-                    int occupancy = ((JSONObject) message).getInt(Constants.JSON_OCCUPANCY);
-                    if (occupancy == 0) {
-                        showToast("User is not online!");
-                        return;
-                    }
-                    JSONObject jsonCall = new JSONObject();
-                    jsonCall.put(Constants.JSON_CALL_USER, username);
-                    jsonCall.put(Constants.JSON_CALL_TIME, System.currentTimeMillis());
-                    mPubNub.publish(callNumStdBy, jsonCall, new Callback() {
-                        @Override
-                        public void successCallback(String channel, Object message) {
-                            Log.d("MA-dC", "SUCCESS: " + message.toString());
-                            Intent intent = new Intent(MainActivity.this, VideoChatActivity.class);
-                            Log.i(LOG_TAG, "Putting Extra USER_NAME: " + username);
-                            Log.i(LOG_TAG, "Putting Extra CALL_USER: " + callNum);
-                            intent.putExtra(Constants.USER_NAME, username);
-                            intent.putExtra(Constants.CALL_USER, callNum);  // Only accept from this number?
-                            startActivity(intent);
-                        }
-                    });
-                } catch (JSONException e) {
-                    e.printStackTrace();
+        JSONObject jsonCall = new JSONObject();
+        try {
+            jsonCall.put(Constants.JSON_CALL_USER, this.username);
+            mPubNub.publish(callNumStdBy, jsonCall, new Callback() {
+                @Override
+                public void successCallback(String channel, Object message) {
+                    Log.d("MA-dCall", "SUCCESS: " + message.toString());
+                    Intent intent = new Intent(MainActivity.this, VideoChatActivity.class);
+                    intent.putExtra(Constants.USER_NAME, username);
+                    intent.putExtra(Constants.CALL_USER, callNum);
+                    startActivity(intent);
                 }
-            }
-        });
+            });
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+//        this.mPubNub.hereNow(callNumStdBy, new Callback() {
+//            public final String LOG_TAG = getClass().getSimpleName();
+//
+//            @Override
+//            public void successCallback(String channel, Object message) {
+//                Log.d("MA-dC", "HERE_NOW: " +" CH - " + callNumStdBy + " " + message.toString());
+//                try {
+//                    int occupancy = ((JSONObject) message).getInt(Constants.JSON_OCCUPANCY);
+//                    if (occupancy == 0) {
+//                        showToast("User is not online!");
+//                        return;
+//                    }
+//                    JSONObject jsonCall = new JSONObject();
+//                    jsonCall.put(Constants.JSON_CALL_USER, username);
+//                    jsonCall.put(Constants.JSON_CALL_TIME, System.currentTimeMillis());
+//                    mPubNub.publish(callNumStdBy, jsonCall, new Callback() {
+//                        @Override
+//                        public void successCallback(String channel, Object message) {
+//                            Log.d("MA-dC", "SUCCESS: " + message.toString());
+//                            Intent intent = new Intent(MainActivity.this, VideoChatActivity.class);
+//                            Log.i(LOG_TAG, "Putting Extra USER_NAME: " + username);
+//                            Log.i(LOG_TAG, "Putting Extra CALL_USER: " + callNum);
+//                            intent.putExtra(Constants.USER_NAME, username);
+//                            intent.putExtra(Constants.CALL_USER, callNum);  // Only accept from this number?
+//                            startActivity(intent);
+//                        }
+//                    });
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
     }
 
     /**
