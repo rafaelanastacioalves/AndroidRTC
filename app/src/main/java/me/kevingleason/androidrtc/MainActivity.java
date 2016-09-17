@@ -18,6 +18,8 @@ import com.pubnub.api.Pubnub;
 import com.pubnub.api.PubnubError;
 import com.pubnub.api.PubnubException;
 
+import com.pubnub.api.PubNub;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,7 +34,7 @@ public class MainActivity extends ListActivity {
     private SharedPreferences mSharedPreferences;
     private String username;
     private String stdByChannel;
-    private Pubnub mPubNub;
+    private PubNub mPubNub;
 
     private ListView mHistoryList;
     private HistoryAdapter mHistoryAdapter;
@@ -113,7 +115,7 @@ public class MainActivity extends ListActivity {
      * Subscribe to standby channel so that it doesn't interfere with the WebRTC Signaling.
      */
     public void initPubNub(){
-        this.mPubNub  = new Pubnub(Constants.PUB_KEY, Constants.SUB_KEY);
+        this.mPubNub  = new PubNub(Constants.PUB_KEY, Constants.SUB_KEY);
         this.mPubNub.setUUID(this.username);
         subscribeStdBy();
     }
