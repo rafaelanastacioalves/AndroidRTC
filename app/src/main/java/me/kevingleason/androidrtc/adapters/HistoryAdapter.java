@@ -11,8 +11,11 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.pubnub.api.Callback;
+import com.pubnub.api.PubNub;
 import com.pubnub.api.Pubnub;
 import com.pubnub.api.callbacks.*;
+import com.pubnub.api.models.consumer.PNStatus;
+import com.pubnub.api.models.consumer.presence.PNGetStateResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,6 +23,7 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -37,13 +41,13 @@ import me.kevingleason.androidrtc.util.Constants;
  */
 public class HistoryAdapter extends ArrayAdapter<HistoryItem> {
     private final Context context;
-    private Pubnub mPubNub;
+    private PubNub mPubNub;
     private LayoutInflater inflater;
     private List<HistoryItem> values;
     private Map<String, ChatUser> users;
 
 
-    public HistoryAdapter(Context context, List<HistoryItem> values, Pubnub pubnub) {
+    public HistoryAdapter(Context context, List<HistoryItem> values, PubNub pubnub) {
         super(context, R.layout.history_row_layout, android.R.id.text1, values);
         this.context  = context;
         this.inflater = LayoutInflater.from(context);
@@ -103,24 +107,32 @@ public class HistoryAdapter extends ArrayAdapter<HistoryItem> {
 
     private void getUserStatus(final ChatUser user, final TextView statusView){
         String stdByUser = user.getUserId() + Constants.STDBY_SUFFIX;
-        this.mPubNub.getState(stdByUser, user.getUserId(), new Callback() {
-            @Override
-            public void successCallback(String channel, Object message) {
-                JSONObject jsonMsg = (JSONObject) message;
-                try {
-                    if (!jsonMsg.has(Constants.JSON_STATUS)) return;
-                    final String status = jsonMsg.getString(Constants.JSON_STATUS);
-                    user.setStatus(status);
-                    ((Activity)getContext()).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            statusView.setText(status);
-                        }
-                    });
-                } catch (JSONException e){
-                    e.printStackTrace();
-                }
-            }
+        this.mPubNub.getPresenceState().channels(Arrays.asList(stdByUser))
+                .uuid(user.getUserId())
+                .async(new PNCallback<PNGetStateResult>() {
+
+                    @Override
+                    public void onResponse(PNGetStateResult result, PNStatus status) {
+
+                    }
+
+//                    @Override
+//            public void on(String channel, Object message) {
+//                JSONObject jsonMsg = (JSONObject) message;
+//                try {
+//                    if (!jsonMsg.has(Constants.JSON_STATUS)) return;
+//                    final String status = jsonMsg.getString(Constants.JSON_STATUS);
+//                    user.setStatus(status);
+//                    ((Activity)getContext()).runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            statusView.setText(status);
+//                        }
+//                    });
+//                } catch (JSONException e){
+//                    e.printStackTrace();
+//                }
+//            }
         });
     }
 
