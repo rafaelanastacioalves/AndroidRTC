@@ -115,7 +115,8 @@ public class HistoryAdapter extends ArrayAdapter<HistoryItem> {
                     public void onResponse(PNGetStateResult result, PNStatus status) {
                         Map<String, Object> userState = result.getStateByUUID();
 
-                        userState.get(Constants.JSON_STATUS)
+                        userState.get(Constants.JSON_STATUS);
+
                     }
 
 //                    @Override
@@ -139,33 +140,33 @@ public class HistoryAdapter extends ArrayAdapter<HistoryItem> {
     }
 
     public void updateHistory(){
-        final List<HistoryItem> rtcHistory = new LinkedList<HistoryItem>();
-        String usrStdBy = this.mPubNub.getUUID() + Constants.STDBY_SUFFIX;
-        this.mPubNub.history(usrStdBy, 25, new Callback() {
-            @Override
-            public void successCallback(String channel, Object message) {
-                Log.d("HA-uH","HISTORY: " + message.toString());
-                try {
-                    JSONArray historyArray = ((JSONArray) message).getJSONArray(0);
-                    for(int i=0; i< historyArray.length(); i++){
-                        JSONObject historyJson = historyArray.getJSONObject(i);
-                        String userName = historyJson.getString(Constants.JSON_CALL_USER);
-                        long timeStamp  = historyJson.getLong(Constants.JSON_CALL_TIME);
-                        ChatUser cUser  = new ChatUser(userName);
-                        if (users.containsKey(userName)){
-                            cUser = users.get(userName);
-                        } else {
-                            users.put(userName, cUser);
-                        }
-                        rtcHistory.add(0, new HistoryItem(cUser, timeStamp));
-                    }
-                    values = rtcHistory;
-                    updateAdapter();
-                } catch (JSONException e){
-                    // e.printStackTrace();
-                }
-            }
-        });
+//        final List<HistoryItem> rtcHistory = new LinkedList<HistoryItem>();
+//        String usrStdBy = this.mPubNub.getUUID() + Constants.STDBY_SUFFIX;
+//        this.mPubNub.history(usrStdBy, 25, new Callback() {
+//            @Override
+//            public void successCallback(String channel, Object message) {
+//                Log.d("HA-uH","HISTORY: " + message.toString());
+//                try {
+//                    JSONArray historyArray = ((JSONArray) message).getJSONArray(0);
+//                    for(int i=0; i< historyArray.length(); i++){
+//                        JSONObject historyJson = historyArray.getJSONObject(i);
+//                        String userName = historyJson.getString(Constants.JSON_CALL_USER);
+//                        long timeStamp  = historyJson.getLong(Constants.JSON_CALL_TIME);
+//                        ChatUser cUser  = new ChatUser(userName);
+//                        if (users.containsKey(userName)){
+//                            cUser = users.get(userName);
+//                        } else {
+//                            users.put(userName, cUser);
+//                        }
+//                        rtcHistory.add(0, new HistoryItem(cUser, timeStamp));
+//                    }
+//                    values = rtcHistory;
+//                    updateAdapter();
+//                } catch (JSONException e){
+//                    // e.printStackTrace();
+//                }
+//            }
+//        });
     }
 
     private void updateAdapter(){
