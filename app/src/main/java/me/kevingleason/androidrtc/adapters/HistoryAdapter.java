@@ -113,7 +113,9 @@ public class HistoryAdapter extends ArrayAdapter<HistoryItem> {
 
                     @Override
                     public void onResponse(PNGetStateResult result, PNStatus status) {
+                        Map<String, Object> userState = result.getStateByUUID();
 
+                        userState.get(Constants.JSON_STATUS)
                     }
 
 //                    @Override
