@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pubnub.api.Callback;
+import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.Pubnub;
 import com.pubnub.api.PubnubError;
 import com.pubnub.api.PubnubException;
@@ -115,8 +116,11 @@ public class MainActivity extends ListActivity {
      * Subscribe to standby channel so that it doesn't interfere with the WebRTC Signaling.
      */
     public void initPubNub(){
-        this.mPubNub  = new PubNub(Constants.PUB_KEY, Constants.SUB_KEY);
-        this.mPubNub.setUUID(this.username);
+        PNConfiguration pnConfiguration = new PNConfiguration();
+        pnConfiguration.setSubscribeKey(Constants.SUB_KEY);
+        pnConfiguration.setPublishKey(Constants.PUB_KEY);
+        pnConfiguration.setUuid(username);
+        this.mPubNub  = new PubNub(pnConfiguration);
         subscribeStdBy();
     }
 
