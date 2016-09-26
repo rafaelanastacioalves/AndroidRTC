@@ -13,6 +13,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.pubnub.api.Callback;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.Pubnub;
@@ -20,6 +21,10 @@ import com.pubnub.api.PubnubError;
 import com.pubnub.api.PubnubException;
 
 import com.pubnub.api.PubNub;
+import com.pubnub.api.callbacks.SubscribeCallback;
+import com.pubnub.api.models.consumer.PNStatus;
+import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
+import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -129,32 +134,58 @@ public class MainActivity extends ListActivity {
      */
     private void subscribeStdBy(){
         try {
-            this.mPubNub.subscribe(this.stdByChannel, new Callback() {
-                @Override
-                public void successCallback(String channel, Object message) {
-                    Log.d("MA-iPN", "MESSAGE: " + message.toString());
-                    if (!(message instanceof JSONObject)) return; // Ignore if not JSONObject
-                    JSONObject jsonMsg = (JSONObject) message;
+
+              this.mPubNub.addListener(new SubscribeCallback() {
+                  @Override
+                  public void status(PubNub pubnub, PNStatus status) {
+
+                  }
+
+                  @Override
+                  public void message(PubNub pubnub, PNMessageResult message) {
+                      Log.d("MA-iPN", "MESSAGE: " + message.toString());
+                    if (!(message.getMessage() instanceof JsonNode)) return; // Ignore if not JSONObject
+                      JsonNode jsonMsg = message.getMessage();
                     try {
                         if (!jsonMsg.has(Constants.JSON_CALL_USER)) return;     //Ignore Signaling messages.
-                        String user = jsonMsg.getString(Constants.JSON_CALL_USER);
-                        dispatchIncomingCall(user);
-                    } catch (JSONException e){
+                        JsonNode user = jsonMsg.get (Constants.JSON_CALL_USER);
+                        dispatchIncomingCall(user.asText());
+                    } catch (Exception e){
                         e.printStackTrace();
                     }
-                }
+                  }
 
-                @Override
-                public void connectCallback(String channel, Object message) {
-                    Log.d("MA-iPN", "CONNECTED: " + message.toString());
-                    setUserStatus(Constants.STATUS_AVAILABLE);
-                }
+                  @Override
+                  public void presence(PubNub pubnub, PNPresenceEventResult presence) {
 
-                @Override
-                public void errorCallback(String channel, PubnubError error) {
-                    Log.d("MA-iPN","ERROR: " + error.toString());
-                }
-            });
+                  }
+              });
+//            this.mPubNub.subscribe(this.stdByChannel, new Callback() {
+//                @Override
+//                public void successCallback(String channel, Object message) {
+//                    Log.d("MA-iPN", "MESSAGE: " + message.toString());
+//                    if (!(message instanceof JSONObject)) return; // Ignore if not JSONObject
+//                    JSONObject jsonMsg = (JSONObject) message;
+//                    try {
+//                        if (!jsonMsg.has(Constants.JSON_CALL_USER)) return;     //Ignore Signaling messages.
+//                        String user = jsonMsg.getString(Constants.JSON_CALL_USER);
+//                        dispatchIncomingCall(user);
+//                    } catch (JSONException e){
+//                        e.printStackTrace();
+//                    }
+//                }
+//
+//                @Override
+//                public void connectCallback(String channel, Object message) {
+//                    Log.d("MA-iPN", "CONNECTED: " + message.toString());
+//                    setUserStatus(Constants.STATUS_AVAILABLE);
+//                }
+//
+//                @Override
+//                public void errorCallback(String channel, PubnubError error) {
+//                    Log.d("MA-iPN","ERROR: " + error.toString());
+//                }
+//            });
         } catch (PubnubException e){
             Log.d("HERE","HEREEEE");
             e.printStackTrace();
