@@ -21,8 +21,12 @@ import com.pubnub.api.PubnubError;
 import com.pubnub.api.PubnubException;
 
 import com.pubnub.api.PubNub;
+import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
 import com.pubnub.api.models.consumer.PNStatus;
+import com.pubnub.api.models.consumer.presence.PNHereNowChannelData;
+import com.pubnub.api.models.consumer.presence.PNHereNowOccupantData;
+import com.pubnub.api.models.consumer.presence.PNHereNowResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
@@ -30,13 +34,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import me.kevingleason.androidrtc.adapters.HistoryAdapter;
 import me.kevingleason.androidrtc.adt.HistoryItem;
 import me.kevingleason.androidrtc.util.Constants;
 
+import static android.R.id.message;
+
 
 public class MainActivity extends ListActivity {
+    private final String TAG = getClass().getSimpleName();
     private SharedPreferences mSharedPreferences;
     private String username;
     private String stdByChannel;
@@ -186,7 +194,7 @@ public class MainActivity extends ListActivity {
 //                    Log.d("MA-iPN","ERROR: " + error.toString());
 //                }
 //            });
-        } catch (PubnubException e){
+        } catch (Exception e){
             Log.d("HERE","HEREEEE");
             e.printStackTrace();
         }
@@ -216,38 +224,71 @@ public class MainActivity extends ListActivity {
      */
     public void dispatchCall(final String callNum){
         final String callNumStdBy = callNum + Constants.STDBY_SUFFIX;
-        this.mPubNub.hereNow(callNumStdBy, new Callback() {
-            public final String LOG_TAG = getClass().getSimpleName();
 
-            @Override
-            public void successCallback(String channel, Object message) {
-                Log.d("MA-dC", "HERE_NOW: " +" CH - " + callNumStdBy + " " + message.toString());
-                try {
-                    int occupancy = ((JSONObject) message).getInt(Constants.JSON_OCCUPANCY);
-                    if (occupancy == 0) {
-                        showToast("User is not online!");
-                        return;
-                    }
-                    JSONObject jsonCall = new JSONObject();
-                    jsonCall.put(Constants.JSON_CALL_USER, username);
-                    jsonCall.put(Constants.JSON_CALL_TIME, System.currentTimeMillis());
-                    mPubNub.publish(callNumStdBy, jsonCall, new Callback() {
-                        @Override
-                        public void successCallback(String channel, Object message) {
-                            Log.d("MA-dC", "SUCCESS: " + message.toString());
-                            Intent intent = new Intent(MainActivity.this, VideoChatActivity.class);
-                            Log.i(LOG_TAG, "Putting Extra USER_NAME: " + username);
-                            Log.i(LOG_TAG, "Putting Extra CALL_USER: " + callNum);
-                            intent.putExtra(Constants.USER_NAME, username);
-                            intent.putExtra(Constants.CALL_USER, callNum);  // Only accept from this number?
-                            startActivity(intent);
+        mPubNub.hereNow()
+                .channels(Arrays.asList(callNumStdBy))
+                .includeUUIDs(true)
+                .async(new PNCallback<PNHereNowResult>() {
+                    @Override
+                    public void onResponse(PNHereNowResult result, PNStatus status) {
+                        if (status.isError()){
+                            Log.e(TAG, "Erro: " + status.getErrorData().toString());
+                            return;
                         }
-                    });
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+
+
+                        for (PNHereNowChannelData channelData : result.getChannels().values()) {
+                            System.out.println("---");
+                            System.out.println("channel:" + channelData.getChannelName());
+                            System.out.println("occoupancy: " + channelData.getOccupancy());
+
+                            int occupancy = channelData.getOccupancy();
+                            if (occupancy == 0) {
+                                showToast("User is not online!");
+                                return;
+                            }
+
+                            System.out.println("occupants:");
+                            for (PNHereNowOccupantData occupant : channelData.getOccupants()) {
+                                System.out.println("uuid: " + occupant.getUuid() + " state: " + occupant.getState());
+                            }
+                        }
+                    }
+                });
+
+//        this.mPubNub.hereNow(callNumStdBy, new Callback() {
+//            public final String LOG_TAG = getClass().getSimpleName();
+//
+//            @Override
+//            public void successCallback(String channel, Object message) {
+//                Log.d("MA-dC", "HERE_NOW: " +" CH - " + callNumStdBy + " " + message.toString());
+//                try {
+//                    int occupancy = ((JSONObject) message).getInt(Constants.JSON_OCCUPANCY);
+//                    if (occupancy == 0) {
+//                        showToast("User is not online!");
+//                        return;
+//                    }
+//                    JSONObject jsonCall = new JSONObject();
+//                    jsonCall.put(Constants.JSON_CALL_USER, username);
+//                    jsonCall.put(Constants.JSON_CALL_TIME, System.currentTimeMillis());
+//                    mPubNub.publish(callNumStdBy, jsonCall, new Callback() {
+//                        @Override
+//                        public void successCallback(String channel, Object message) {
+//                            Log.d("MA-dC", "SUCCESS: " + message.toString());
+//                            Intent intent = new Intent(MainActivity.this, VideoChatActivity.class);
+//                            Log.i(LOG_TAG, "Putting Extra USER_NAME: " + username);
+//                            Log.i(LOG_TAG, "Putting Extra CALL_USER: " + callNum);
+//                            intent.putExtra(Constants.USER_NAME, username);
+//                            intent.putExtra(Constants.CALL_USER, callNum);  // Only accept from this number?
+//                            startActivity(intent);
+//                        }
+//                    });
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
+
     }
 
     /**
