@@ -14,6 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.pubnub.api.Callback;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.Pubnub;
@@ -23,6 +25,7 @@ import com.pubnub.api.PubnubException;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
+import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.presence.PNHereNowChannelData;
 import com.pubnub.api.models.consumer.presence.PNHereNowOccupantData;
@@ -252,6 +255,31 @@ public class MainActivity extends ListActivity {
                             for (PNHereNowOccupantData occupant : channelData.getOccupants()) {
                                 System.out.println("uuid: " + occupant.getUuid() + " state: " + occupant.getState());
                             }
+
+//                            using JsonNodeFactory as thought in https://www.pubnub.com/docs/android/api-reference-sdk-v4#publish
+                            JsonNodeFactory factory = JsonNodeFactory.instance;
+                            ObjectNode jsonCall = factory.objectNode();
+                            jsonCall.put(Constants.JSON_CALL_USER,username);
+                            jsonCall.put(Constants.JSON_CALL_TIME,System.currentTimeMillis());
+                            mPubNub.publish()
+                                    .message(jsonCall)
+                                    .channel(callNumStdBy)
+                                    .async(new PNCallback<PNPublishResult>() {
+                                        @Override
+                                        public void onResponse(PNPublishResult result, PNStatus status) {
+                                            if(status.isError()){
+                                                Log.e(TAG, "Erro: " + status.getErrorData().toString());
+                                                return;
+                                            }
+                                            Intent intent = new Intent(MainActivity.this, VideoChatActivity.class);
+                                            Log.i(TAG, "Putting Extra USER_NAME: " + username);
+                                            Log.i(TAG, "Putting Extra CALL_USER: " + callNum);
+                                            intent.putExtra(Constants.USER_NAME, username);
+                                            intent.putExtra(Constants.CALL_USER, callNum);  // Only accept from this number?
+                                            startActivity(intent);
+                                        }
+                                    });
+
                         }
                     }
                 });
