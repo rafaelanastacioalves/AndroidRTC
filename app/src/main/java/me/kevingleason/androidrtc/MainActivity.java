@@ -30,6 +30,7 @@ import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.presence.PNHereNowChannelData;
 import com.pubnub.api.models.consumer.presence.PNHereNowOccupantData;
 import com.pubnub.api.models.consumer.presence.PNHereNowResult;
+import com.pubnub.api.models.consumer.presence.PNSetStateResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
@@ -38,12 +39,15 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import me.kevingleason.androidrtc.adapters.HistoryAdapter;
 import me.kevingleason.androidrtc.adt.HistoryItem;
 import me.kevingleason.androidrtc.util.Constants;
 
 import static android.R.id.message;
+import static me.kevingleason.androidrtc.R.drawable.pubnub;
 
 
 public class MainActivity extends ListActivity {
@@ -337,18 +341,32 @@ public class MainActivity extends ListActivity {
     }
 
     private void setUserStatus(String status){
-        try {
-            JSONObject state = new JSONObject();
-            state.put(Constants.JSON_STATUS, status);
-            this.mPubNub.setState(this.stdByChannel, this.username, state, new Callback() {
-                @Override
-                public void successCallback(String channel, Object message) {
-                    Log.d("MA-sUS","State Set: " + message.toString());
-                }
-            });
-        } catch (JSONException e){
-            e.printStackTrace();
-        }
+        final Map<String, Object> state = new HashMap<>();
+        state.put(Constants.JSON_STATUS, status);
+        mPubNub.setPresenceState()
+                .channels(Arrays.asList(this.stdByChannel, this.username)) // apply on those channels
+                .state(state) // the new state
+                .async(new PNCallback<PNSetStateResult>() {
+                    @Override
+                    public void onResponse(PNSetStateResult result, PNStatus status) {
+                        if (status.isError()) {
+                            Log.e(TAG, "Erro: " + status.getErrorData().toString());
+                            return;
+                        }
+
+                    Log.d("MA-sUS","State Set: " + result.getState().toString());
+
+                    }
+                });
+
+//            JSONObject state = new JSONObject();
+//            state.put(Constants.JSON_STATUS, status);
+//            this.mPubNub.setState(this.stdByChannel, this.username, state, new Callback() {
+//                @Override
+//                public void successCallback(String channel, Object message) {
+//                    Log.d("MA-sUS","State Set: " + message.toString());
+//                }
+//            });
     }
 
     private void getUserStatus(String userId){
