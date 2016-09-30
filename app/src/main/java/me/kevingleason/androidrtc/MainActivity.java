@@ -27,6 +27,7 @@ import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
 import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
+import com.pubnub.api.models.consumer.presence.PNGetStateResult;
 import com.pubnub.api.models.consumer.presence.PNHereNowChannelData;
 import com.pubnub.api.models.consumer.presence.PNHereNowOccupantData;
 import com.pubnub.api.models.consumer.presence.PNHereNowResult;
@@ -37,6 +38,7 @@ import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -371,12 +373,20 @@ public class MainActivity extends ListActivity {
 
     private void getUserStatus(String userId){
         String stdByUser = userId + Constants.STDBY_SUFFIX;
-        this.mPubNub.getState(stdByUser, userId, new Callback() {
-            @Override
-            public void successCallback(String channel, Object message) {
-                Log.d("MA-gUS", "User Status: " + message.toString());
-            }
-        });
+        this.mPubNub.getPresenceState()
+                .channels(Arrays.asList(stdByUser,stdByChannel))
+                .uuid(userId)
+                .async(new PNCallback<PNGetStateResult>() {
+                    @Override
+                    public void onResponse(PNGetStateResult result, PNStatus status) {
+                        if (status.isError()){
+                            Log.e(TAG, "Erro: " + status.getErrorData().toString());
+                            return;
+                        }
+                        Log.d("MA-gUS", "User Status: " + result.toString());
+
+                    }
+                });
     }
 
     /**
