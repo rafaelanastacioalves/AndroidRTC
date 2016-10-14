@@ -10,9 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.pubnub.api.Callback;
 import com.pubnub.api.PubNub;
-import com.pubnub.api.Pubnub;
 import com.pubnub.api.callbacks.*;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.presence.PNGetStateResult;

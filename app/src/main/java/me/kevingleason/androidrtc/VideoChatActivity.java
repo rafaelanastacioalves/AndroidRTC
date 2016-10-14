@@ -37,12 +37,10 @@ import java.util.concurrent.ExecutionException;
 
 import me.kevingleason.androidrtc.adapters.ChatAdapter;
 import me.kevingleason.androidrtc.adt.ChatMessage;
-import me.kevingleason.androidrtc.servers.XirSysRequest;
 import me.kevingleason.androidrtc.util.Constants;
 import me.kevingleason.androidrtc.util.LogRTCListener;
 import me.kevingleason.pnwebrtc.PnPeer;
 import me.kevingleason.pnwebrtc.PnRTCClient;
-import me.kevingleason.pnwebrtc.PnSignalingParams;
 
 /**
  * This chat will begin/subscribe to a video chat.
@@ -324,19 +322,19 @@ public class VideoChatActivity extends ListActivity {
         super.onBackPressed();
     }
 
-    public List<PeerConnection.IceServer> getXirSysIceServers(){
-        Log.i(LOG_TAG,"getXirSysIceServers...");
-        List<PeerConnection.IceServer> servers = new ArrayList<PeerConnection.IceServer>();
-        try {
-            servers = new XirSysRequest().execute().get();
-        } catch (InterruptedException e){
-            e.printStackTrace();
-        }catch (ExecutionException e){
-            e.printStackTrace();
-        }
-        Log.i(LOG_TAG,"...getXirSysIceServers");
-        return servers;
-    }
+//    public List<PeerConnection.IceServer> getXirSysIceServers(){
+//        Log.i(LOG_TAG,"getXirSysIceServers...");
+//        List<PeerConnection.IceServer> servers = new ArrayList<PeerConnection.IceServer>();
+//        try {
+//            servers = new XirSysRequest().execute().get();
+//        } catch (InterruptedException e){
+//            e.printStackTrace();
+//        }catch (ExecutionException e){
+//            e.printStackTrace();
+//        }
+//        Log.i(LOG_TAG,"...getXirSysIceServers");
+//        return servers;
+//    }
 
     public void connectToUser(String user) {
         this.pnRTCClient.connect(user);

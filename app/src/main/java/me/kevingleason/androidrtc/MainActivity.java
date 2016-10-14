@@ -148,10 +148,11 @@ public class MainActivity extends ListActivity {
      */
     private void subscribeStdBy(){
         try {
-
+              Log.d(TAG,"subscribeStdBy -> Adding Listener ");
               this.mPubNub.addListener(new SubscribeCallback() {
                   @Override
                   public void status(PubNub pubnub, PNStatus status) {
+                      Log.d("MA-iPN", "STATUS: " + status.toString());
 
                   }
 
@@ -171,9 +172,11 @@ public class MainActivity extends ListActivity {
 
                   @Override
                   public void presence(PubNub pubnub, PNPresenceEventResult presence) {
+                      Log.d("MA-iPN", "STATUS: " + presence.toString());
 
                   }
               });
+            this.mPubNub.subscribe().channels(Arrays.asList(this.stdByChannel)).execute();
 //            this.mPubNub.subscribe(this.stdByChannel, new Callback() {
 //                @Override
 //                public void successCallback(String channel, Object message) {

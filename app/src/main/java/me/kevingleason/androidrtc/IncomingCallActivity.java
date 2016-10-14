@@ -11,8 +11,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.pubnub.api.Callback;
-import com.pubnub.api.Pubnub;
 
 import org.json.JSONObject;
 
@@ -27,7 +25,7 @@ public class IncomingCallActivity extends Activity {
     private String username;
     private String callUser;
 
-    private Pubnub mPubNub;
+//    private Pubnub mPubNub;
     private TextView mCallerID;
     private PnRTCClient pnRTCClient;
 
@@ -59,10 +57,10 @@ public class IncomingCallActivity extends Activity {
         this.mCallerID = (TextView) findViewById(R.id.caller_id);
         this.mCallerID.setText(this.callUser);
 
-        this.mPubNub  = new Pubnub(Constants.PUB_KEY, Constants.SUB_KEY);
+//        this.mPubNub  = new Pubnub(Constants.PUB_KEY, Constants.SUB_KEY);
         Log.i(LOG_TAG,"new pubNub");
 
-        this.mPubNub.setUUID(this.username);
+//        this.mPubNub.setUUID(this.username);
         Log.i(LOG_TAG,"setUUID");
 
         Log.i(LOG_TAG,"onCreate: ...End");
@@ -94,33 +92,33 @@ public class IncomingCallActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void acceptCall(View view){
-        Intent intent = new Intent(IncomingCallActivity.this, VideoChatActivity.class);
-        intent.putExtra(Constants.USER_NAME, this.username);
-        intent.putExtra(Constants.CALL_USER, this.callUser);
-        startActivity(intent);
-    }
+//    public void acceptCall(View view){
+//        Intent intent = new Intent(IncomingCallActivity.this, VideoChatActivity.class);
+//        intent.putExtra(Constants.USER_NAME, this.username);
+//        intent.putExtra(Constants.CALL_USER, this.callUser);
+//        startActivity(intent);
+//    }
 
     /**
      * Publish a hangup command if rejecting call.
      * @param view
      */
-    public void rejectCall(View view){
-        JSONObject hangupMsg = PnPeerConnectionClient.generateHangupPacket(this.username);
-        this.mPubNub.publish(this.callUser,hangupMsg, new Callback() {
-            @Override
-            public void successCallback(String channel, Object message) {
-                Intent intent = new Intent(IncomingCallActivity.this, MainActivity.class);
-                startActivity(intent);
-            }
-        });
-    }
+//    public void rejectCall(View view){
+//        JSONObject hangupMsg = PnPeerConnectionClient.generateHangupPacket(this.username);
+//        this.mPubNub.publish(this.callUser,hangupMsg, new Callback() {
+//            @Override
+//            public void successCallback(String channel, Object message) {
+//                Intent intent = new Intent(IncomingCallActivity.this, MainActivity.class);
+//                startActivity(intent);
+//            }
+//        });
+//    }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if(this.mPubNub!=null){
-            this.mPubNub.unsubscribeAll();
-        }
-    }
+//    @Override
+//    protected void onStop() {
+//        super.onStop();
+//        if(this.mPubNub!=null){
+//            this.mPubNub.unsubscribeAll();
+//        }
+//    }
 }
