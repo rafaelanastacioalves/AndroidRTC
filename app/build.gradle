@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion '23.0.3'
+    compileSdkVersion 23
+    buildToolsVersion '24.0.2'
 
     defaultConfig {
         applicationId "me.kevingleason.androidrtc"
         minSdkVersion 17
-        targetSdkVersion 21
+        targetSdkVersion 24
         versionCode 1
         versionName "1.0"
     }
@@ -33,8 +33,9 @@ repositories {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'me.kevingleason:pnwebrtc:1.0.6@aar'
-    compile 'io.pristine:libjingle:9694@aar'
-    compile group: 'com.pubnub', name: 'pubnub', version: '4.0.12'
-//    compile project(':pnwebrtc')
+//    compile 'me.kevingleason:pnwebrtc:1.0.6@aar'
+//    compile group: 'com.pubnub', name: 'pubnub-android', version: '3.7.10'
+    compile 'com.pubnub:pubnub:4.0.12'
+    compile project(':pnwebrtc')
+    //    compile project(':pnwebrtc')
 }
