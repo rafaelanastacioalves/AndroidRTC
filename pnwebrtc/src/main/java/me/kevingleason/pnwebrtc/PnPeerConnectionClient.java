@@ -4,8 +4,12 @@ import android.util.Log;
 
 import com.pubnub.api.Callback;
 import com.pubnub.api.Pubnub;
+import com.pubnub.api.PubNub;
+
 import com.pubnub.api.PubnubError;
 import com.pubnub.api.PubnubException;
+
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,13 +46,13 @@ public class PnPeerConnectionClient {
     PnSignalingParams signalingParams;
     int MAX_CONNECTIONS = Integer.MAX_VALUE;
 
-    private Pubnub mPubNub;
+    private PubNub mPubNub;
     private PnRTCReceiver mSubscribeReceiver;
     private Map<String,PnAction> actionMap;
     private Map<String,PnPeer> peers;
     private String id;
 
-    public PnPeerConnectionClient(Pubnub pubnub, PnSignalingParams signalingParams, PnRTCListener rtcListener){
+    public PnPeerConnectionClient(PubNub pubnub, PnSignalingParams signalingParams, PnRTCListener rtcListener){
         this.mPubNub = pubnub;
         this.signalingParams = signalingParams;
         this.mRtcListener = rtcListener;
