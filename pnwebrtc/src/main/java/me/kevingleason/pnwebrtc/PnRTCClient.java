@@ -1,7 +1,8 @@
 package me.kevingleason.pnwebrtc;
 
 
-import com.pubnub.api.Pubnub;
+import com.pubnub.api.PNConfiguration;
+import com.pubnub.api.PubNub;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,6 +10,7 @@ import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
 
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -23,7 +25,7 @@ import java.util.List;
  */
 public class PnRTCClient {
     private PnSignalingParams pnSignalingParams;
-    private Pubnub mPubNub;
+    private PubNub mPubNub;
     private PnPeerConnectionClient pcClient;
     private String UUID;
 
@@ -36,8 +38,11 @@ public class PnRTCClient {
      */
     public PnRTCClient(String pubKey, String subKey) {
         this.UUID = generateRandomNumber();
-        this.mPubNub  = new Pubnub(pubKey, subKey);
-        this.mPubNub.setUUID(this.UUID);
+        PNConfiguration pnConfiguration = new PNConfiguration();
+        pnConfiguration.setUuid(subKey)
+                .setPublishKey(pubKey)
+                .setUuid(this.UUID);
+        this.mPubNub  = new PubNub(pnConfiguration);
         this.pnSignalingParams = PnSignalingParams.defaultInstance();
         this.pcClient = new PnPeerConnectionClient(this.mPubNub, this.pnSignalingParams, new PnRTCListener() {});
     }
@@ -51,8 +56,10 @@ public class PnRTCClient {
      */
     public PnRTCClient(String pubKey, String subKey, String UUID) {
         this.UUID = UUID;
-        this.mPubNub  = new Pubnub(pubKey, subKey);
-        this.mPubNub.setUUID(this.UUID);
+        PNConfiguration pnConfiguration = new PNConfiguration();
+        pnConfiguration.setUuid(subKey)
+                .setPublishKey(pubKey)
+                .setUuid(this.UUID);
         this.pnSignalingParams = PnSignalingParams.defaultInstance();
         this.pcClient = new PnPeerConnectionClient(this.mPubNub, this.pnSignalingParams, new PnRTCListener() {});
     }
@@ -83,9 +90,9 @@ public class PnRTCClient {
 
     /**
      * Return the {@link me.kevingleason.pnwebrtc.PnRTCClient} Pubnub instance.
-     * @return The PnRTCClient's {@link com.pubnub.api.Pubnub} instance
+     * @return The PnRTCClient's {@link com.pubnub.api.PubNub} instance
      */
-    public Pubnub getPubNub(){
+    public PubNub getPubNub(){
         return this.mPubNub;
     }
 
