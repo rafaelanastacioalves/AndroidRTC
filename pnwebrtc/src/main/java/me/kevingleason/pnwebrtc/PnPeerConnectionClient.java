@@ -3,12 +3,14 @@ package me.kevingleason.pnwebrtc;
 import android.util.Log;
 
 import com.pubnub.api.Callback;
-import com.pubnub.api.Pubnub;
 import com.pubnub.api.PubNub;
 
 import com.pubnub.api.PubnubError;
 import com.pubnub.api.PubnubException;
-
+import com.pubnub.api.callbacks.SubscribeCallback;
+import com.pubnub.api.models.consumer.PNStatus;
+import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
+import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
 
 import org.json.JSONArray;
@@ -21,6 +23,7 @@ import org.webrtc.PeerConnectionFactory;
 import org.webrtc.SessionDescription;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -116,7 +119,8 @@ public class PnPeerConnectionClient {
 
     private void subscribe(String channel){
         try {
-            mPubNub.subscribe(channel, this.mSubscribeReceiver);
+              mPubNub.subscribe().channels(Arrays.asList(channel))
+//            mPubNub.subscribe(channel, this.mSubscribeReceiver);
         } catch (PubnubException e){
             e.printStackTrace();
         }
@@ -327,7 +331,7 @@ public class PnPeerConnectionClient {
         return json;
     }
 
-    private class PnRTCReceiver extends Callback {
+    private class PnRTCReceiver extends SubscribeCallback {
 
         @Override
         public void connectCallback(String channel, Object message) {
@@ -387,6 +391,20 @@ public class PnPeerConnectionClient {
             super.errorCallback(channel, error);
         }
 
+        @Override
+        public void status(PubNub pubnub, PNStatus status) {
+            
+        }
+
+        @Override
+        public void message(PubNub pubnub, PNMessageResult message) {
+
+        }
+
+        @Override
+        public void presence(PubNub pubnub, PNPresenceEventResult presence) {
+
+        }
     }
 
 }
