@@ -2,6 +2,7 @@ package me.kevingleason.pnwebrtc;
 
 import android.util.Log;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.pubnub.api.Callback;
 import com.pubnub.api.PubNub;
 
@@ -210,12 +211,12 @@ public class PnPeerConnectionClient {
     }
 
     private interface PnAction{
-        void execute(String peerId, JSONObject payload) throws JSONException;
+        void execute(String peerId, JsonNode payload) throws JSONException;
     }
 
     private class CreateOfferAction implements PnAction{
         public static final String TRIGGER = "init";
-        public void execute(String peerId, JSONObject payload) throws JSONException {
+        public void execute(String peerId, JsonNode payload) throws JSONException {
             Log.d("COAction","CreateOfferAction");
             PnPeer peer = peers.get(peerId);
             peer.setDialed(true);
@@ -226,14 +227,14 @@ public class PnPeerConnectionClient {
 
     private class CreateAnswerAction implements PnAction{
         public static final String TRIGGER = "offer";
-        public void execute(String peerId, JSONObject payload) throws JSONException {
+        public void execute(String peerId, JsonNode payload) throws JSONException {
             Log.d("CAAction","CreateAnswerAction");
             PnPeer peer = peers.get(peerId);
             peer.setType(PnPeer.TYPE_OFFER);
             peer.setStatus(PnPeer.STATUS_CONNECTED);
             SessionDescription sdp = new SessionDescription(
-                    SessionDescription.Type.fromCanonicalForm(payload.getString("type")),
-                    payload.getString("sdp")
+                    SessionDescription.Type.fromCanonicalForm(payload.get("type").asText()),
+                    payload.get("sdp").asText()
             );
             peer.pc.setRemoteDescription(peer, sdp);
             peer.pc.createAnswer(peer, signalingParams.pcConstraints);
@@ -242,12 +243,12 @@ public class PnPeerConnectionClient {
 
     private class SetRemoteSDPAction implements PnAction{
         public static final String TRIGGER = "answer";
-        public void execute(String peerId, JSONObject payload) throws JSONException {
+        public void execute(String peerId, JsonNode payload) throws JSONException {
             Log.d("SRSAction","SetRemoteSDPAction");
             PnPeer peer = peers.get(peerId);
             SessionDescription sdp = new SessionDescription(
-                    SessionDescription.Type.fromCanonicalForm(payload.getString("type")),
-                    payload.getString("sdp")
+                    SessionDescription.Type.fromCanonicalForm(payload.get("type").asText()),
+                    payload.get("sdp").asText()
             );
             peer.pc.setRemoteDescription(peer, sdp);
         }
@@ -255,14 +256,14 @@ public class PnPeerConnectionClient {
 
     private class AddIceCandidateAction implements PnAction{
         public static final String TRIGGER = "candidate";
-        public void execute(String peerId, JSONObject payload) throws JSONException {
+        public void execute(String peerId, JsonNode payload) throws JSONException {
             Log.d("AICAction","AddIceCandidateAction");
             PeerConnection pc = peers.get(peerId).pc;
             if (pc.getRemoteDescription() != null) {
                 IceCandidate candidate = new IceCandidate(
-                        payload.getString("sdpMid"),
-                        payload.getInt("sdpMLineIndex"),
-                        payload.getString("candidate")
+                        payload.get("sdpMid").asText(),
+                        payload.get("sdpMLineIndex").asInt(),
+                        payload.get("candidate").asText()
                 );
                 pc.addIceCandidate(candidate);
             }
@@ -271,7 +272,7 @@ public class PnPeerConnectionClient {
 
     private class PnUserHangupAction implements PnAction{
         public static final String TRIGGER = PnRTCMessage.JSON_HANGUP;
-        public void execute(String peerId, JSONObject payload) throws JSONException {
+        public void execute(String peerId, JsonNode payload) throws JSONException {
             Log.d("PnUserHangup","PnUserHangupAction");
             PnPeer peer = peers.get(peerId);
             peer.hangup();
@@ -282,9 +283,9 @@ public class PnPeerConnectionClient {
 
     private class PnUserMessageAction implements PnAction{
         public static final String TRIGGER = PnRTCMessage.JSON_USERMSG;
-        public void execute(String peerId, JSONObject payload) throws JSONException {
+        public void execute(String peerId, JsonNode payload) throws JSONException {
             Log.d("PnUserMessage","AddIceCandidateAction");
-            JSONObject msgJson = payload.getJSONObject(PnRTCMessage.JSON_USERMSG);
+            JsonNode msgJson = payload.get(PnRTCMessage.JSON_USERMSG);
             PnPeer peer = peers.get(peerId);
             mRtcListener.onMessage(peer, msgJson);
         }
@@ -333,20 +334,26 @@ public class PnPeerConnectionClient {
 
     private class PnRTCReceiver extends SubscribeCallback {
 
+        private final String TAG = getClass().getSimpleName();
+
         @Override
-        public void connectCallback(String channel, Object message) {
-            mRtcListener.onDebug(new PnRTCMessage(((JSONArray) message).toString()));
-            mRtcListener.onConnected(channel);
+        public void status(PubNub pubnub, PNStatus status) {
+            if (status.isError()){
+                Log.e(TAG, "Erro: " + status.getErrorData().toString());
+                return;
+            }
         }
 
         @Override
-        public void successCallback(String channel, Object message) {
-            if (!(message instanceof JSONObject)) return; // Ignore if not valid JSON.
-            JSONObject jsonMessage = (JSONObject) message;
-            mRtcListener.onDebug(new PnRTCMessage(jsonMessage));
+        public void message(PubNub pubnub, PNMessageResult message) {
+            if (!(message.getMessage() instanceof JsonNode)) return; // Ignore if not JSONObject
+            JsonNode jsonMessage = message.getMessage(); // como converter para JSONObject?
+
+
+            mRtcListener.onDebug(new PnRTCMessage(jsonMessage.toString()));
             try {
-                String peerId     = jsonMessage.getString(PnRTCMessage.JSON_NUMBER);
-                JSONObject packet = jsonMessage.getJSONObject(PnRTCMessage.JSON_PACKET);
+                String peerId     = jsonMessage.get(PnRTCMessage.JSON_NUMBER).asText();
+                JsonNode packet = jsonMessage.get(PnRTCMessage.JSON_PACKET);
                 PnPeer peer;
                 if (!peers.containsKey(peerId)){
                     // Possibly threshold number of allowed users
@@ -373,7 +380,7 @@ public class PnPeerConnectionClient {
                         mRtcListener.onDebug(new PnRTCMessage("SDP - " + peer.toString()));
                         // Todo: reveivercb(peer);
                     }
-                    String type = packet.getString(PnRTCMessage.JSON_TYPE);
+                    String type = packet.get(PnRTCMessage.JSON_TYPE).asText();
                     actionMap.get(type).execute(peerId, packet);
                     return;
                 }
@@ -384,21 +391,6 @@ public class PnPeerConnectionClient {
             } catch (JSONException e){
                 e.printStackTrace();
             }
-        }
-
-        @Override
-        public void errorCallback(String channel, PubnubError error) {
-            super.errorCallback(channel, error);
-        }
-
-        @Override
-        public void status(PubNub pubnub, PNStatus status) {
-            
-        }
-
-        @Override
-        public void message(PubNub pubnub, PNMessageResult message) {
-
         }
 
         @Override
