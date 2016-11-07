@@ -3,12 +3,12 @@ package me.kevingleason.pnwebrtc;
 import android.util.Log;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.pubnub.api.Callback;
 import com.pubnub.api.PubNub;
 
-import com.pubnub.api.PubnubError;
-import com.pubnub.api.PubnubException;
+
+import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
+import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
@@ -96,18 +96,17 @@ public class PnPeerConnectionClient {
      * @return boolean value of success
      */
     boolean connect(String userId) {
-        if (!peers.containsKey(userId)) { // Prevents duplicate dials.
-            if (peers.size() < MAX_CONNECTIONS) {
-                PnPeer peer = addPeer(userId);
-                peer.pc.addStream(this.localMediaStream);
-                try {
-                    actionMap.get(CreateOfferAction.TRIGGER).execute(userId, new JSONObject());
-                } catch (JSONException e){
-                    e.printStackTrace();
-                    return false;
-                }
-                return true;
+        // Prevents duplicate dials.
+        if (!peers.containsKey(userId)) if (peers.size() < MAX_CONNECTIONS) {
+            PnPeer peer = addPeer(userId);
+            peer.pc.addStream(this.localMediaStream);
+            try {
+                actionMap.get(CreateOfferAction.TRIGGER).execute(userId,  );
+            } catch (JSONException   e) {
+                e.printStackTrace();
+                return false;
             }
+            return true;
         }
         this.mRtcListener.onDebug(new PnRTCMessage("CONNECT FAILED. Duplicate dial or max peer " +
                 "connections exceeded. Max: " + MAX_CONNECTIONS + " Current: " + this.peers.size()));
@@ -119,12 +118,8 @@ public class PnPeerConnectionClient {
     }
 
     private void subscribe(String channel){
-        try {
-              mPubNub.subscribe().channels(Arrays.asList(channel))
+        mPubNub.subscribe().channels(Arrays.asList(channel)).execute();
 //            mPubNub.subscribe(channel, this.mSubscribeReceiver);
-        } catch (PubnubException e){
-            e.printStackTrace();
-        }
     }
 
     public void setLocalMediaStream(MediaStream localStream){
@@ -194,16 +189,18 @@ public class PnPeerConnectionClient {
             message.put(PnRTCMessage.JSON_PACKET, packet);
             message.put(PnRTCMessage.JSON_ID, ""); //Todo: session id, unused in js SDK?
             message.put(PnRTCMessage.JSON_NUMBER, this.id);
-            this.mPubNub.publish(toID, message, new Callback() {  // Todo: reconsider callback.
-                @Override
-                public void successCallback(String channel, Object message, String timetoken) {
-                    mRtcListener.onDebug(new PnRTCMessage((JSONObject)message));
-                }
+            this.mPubNub.publish().message(message).channel(toID).async(new PNCallback<PNPublishResult>() {
+                public final String TAG = getClass().getSimpleName();
 
                 @Override
-                public void errorCallback(String channel, PubnubError error) {
-                    mRtcListener.onDebug(new PnRTCMessage(error.errorObject));
-                }
+                public void onResponse(PNPublishResult result, PNStatus status) {
+                    if (status.isError()) {
+                        // something bad happened.
+                        Log.e(TAG,"error happened while publishing: " + status.toString());
+                    } else {
+                        Log.d(TAG,"publish worked! timetoken: " + result.getTimetoken());
+                    }
+                }   
             });
         } catch (JSONException e){
             e.printStackTrace();
