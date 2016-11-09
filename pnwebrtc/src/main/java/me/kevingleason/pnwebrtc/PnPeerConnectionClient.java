@@ -3,6 +3,8 @@ package me.kevingleason.pnwebrtc;
 import android.util.Log;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeCreator;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.pubnub.api.PubNub;
 
 
@@ -101,7 +103,7 @@ public class PnPeerConnectionClient {
             PnPeer peer = addPeer(userId);
             peer.pc.addStream(this.localMediaStream);
             try {
-                actionMap.get(CreateOfferAction.TRIGGER).execute(userId,  );
+                actionMap.get(CreateOfferAction.TRIGGER).execute(userId, JsonNodeFactory.instance.objectNode());
             } catch (JSONException   e) {
                 e.printStackTrace();
                 return false;
@@ -125,7 +127,7 @@ public class PnPeerConnectionClient {
     public void setLocalMediaStream(MediaStream localStream){
         this.localMediaStream = localStream;
         mRtcListener.onLocalStream(localStream);
-    }
+    } 
 
     public MediaStream getLocalMediaStream(){
         return this.localMediaStream;
