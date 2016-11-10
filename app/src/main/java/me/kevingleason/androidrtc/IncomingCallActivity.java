@@ -7,16 +7,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import org.json.JSONObject;
-
 import me.kevingleason.androidrtc.util.Constants;
-import me.kevingleason.pnwebrtc.PnPeerConnectionClient;
-import me.kevingleason.pnwebrtc.PnRTCClient;
 
 
 public class IncomingCallActivity extends Activity {
@@ -27,7 +21,6 @@ public class IncomingCallActivity extends Activity {
 
 //    private Pubnub mPubNub;
     private TextView mCallerID;
-    private PnRTCClient pnRTCClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
