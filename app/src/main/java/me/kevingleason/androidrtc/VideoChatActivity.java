@@ -21,7 +21,6 @@ import org.json.JSONObject;
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
 import org.webrtc.MediaStream;
-import org.webrtc.PeerConnection;
 import org.webrtc.PeerConnectionFactory;
 import org.webrtc.VideoCapturer;
 import org.webrtc.VideoCapturerAndroid;
@@ -30,10 +29,8 @@ import org.webrtc.VideoRendererGui;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import me.kevingleason.androidrtc.adapters.ChatAdapter;
 import me.kevingleason.androidrtc.adt.ChatMessage;
@@ -235,6 +232,7 @@ public class VideoChatActivity extends ListActivity {
         // Listen on a channel. This is your "phone number," also set the max chat users.
 
         //// TODO: 26/08/16 Change this Kevin...
+        Log.i(LOG_TAG, "passing the username: " + username);
         this.pnRTCClient.listenOn(username);
         this.pnRTCClient.setMaxConnections(1);
 

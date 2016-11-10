@@ -10,7 +10,6 @@ import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
 
 import java.util.List;
-import java.util.UUID;
 
 
 /**
@@ -60,6 +59,7 @@ public class PnRTCClient {
         pnConfiguration.setUuid(subKey)
                 .setPublishKey(pubKey)
                 .setUuid(this.UUID);
+        this.mPubNub  = new PubNub(pnConfiguration);
         this.pnSignalingParams = PnSignalingParams.defaultInstance();
         this.pcClient = new PnPeerConnectionClient(this.mPubNub, this.pnSignalingParams, new PnRTCListener() {});
     }
