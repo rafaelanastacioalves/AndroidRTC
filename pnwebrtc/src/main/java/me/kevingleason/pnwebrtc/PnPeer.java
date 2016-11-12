@@ -150,13 +150,32 @@ public class PnPeer implements SdpObserver, PeerConnection.Observer {
     public void onIceCandidate(final IceCandidate candidate) {
         try {
             JSONObject payload = new JSONObject();
-            payload.put("sdpMLineIndex", candidate.sdpMLineIndex);
-            payload.put("sdpMid", candidate.sdpMid);
+            payload.put("label", candidate.sdpMLineIndex);
+            payload.put("id", candidate.sdpMid);
             payload.put("candidate", candidate.sdp);
-            pcClient.transmitMessage(id, payload);
+            sendMessage(id, "candidate", payload);
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+
+    /**
+     * Send a message through the signaling server
+     *
+     * @param to      id of recipient
+     * @param type    type of message
+     * @param payload payload of message
+     * @throws JSONException
+     */
+    public void sendMessage(String to, String type, JSONObject payload) throws JSONException {
+        JSONObject message = new JSONObject();
+        message.put("to", to);
+        message.put("type", type);
+        message.put("payload", payload);
+        pcClient.transmitMessage(id, payload);
+
     }
 
     @Override
