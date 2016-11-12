@@ -3,11 +3,8 @@ package me.kevingleason.pnwebrtc;
 import android.util.Log;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeCreator;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.pubnub.api.PubNub;
-
-
 import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.callbacks.SubscribeCallback;
 import com.pubnub.api.models.consumer.PNPublishResult;
@@ -15,8 +12,6 @@ import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.IceCandidate;
@@ -62,6 +57,7 @@ public class PnPeerConnectionClient {
         this.mPubNub = pubnub;
         this.signalingParams = signalingParams;
         this.mRtcListener = rtcListener;
+//        PeerConnectionFactory.initializeAndroidGlobals(mRtcListener,true,true,true,);
         this.pcFactory = new PeerConnectionFactory(); // TODO: Check it allowed, else extra param
         this.peers = new HashMap<String, PnPeer>();
         init();

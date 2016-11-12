@@ -3,6 +3,7 @@ package me.kevingleason.androidrtc;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.Camera;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,6 +23,7 @@ import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
 import org.webrtc.MediaStream;
 import org.webrtc.PeerConnectionFactory;
+import org.webrtc.RendererCommon;
 import org.webrtc.VideoCapturer;
 import org.webrtc.VideoCapturerAndroid;
 import org.webrtc.VideoRenderer;
@@ -97,8 +99,7 @@ public class VideoChatActivity extends ListActivity {
                 this,  // Context
                 true,  // Audio Enabled
                 true,  // Video Enabled
-                true,  // Hardware Acceleration Enabled
-                null); // Render EGL Context
+                true);  // Hardware Acceleration Enab);
 
         Log.i(LOG_TAG,"new PeerConnectionFactory");
         PeerConnectionFactory pcFactory = new PeerConnectionFactory();
@@ -118,9 +119,8 @@ public class VideoChatActivity extends ListActivity {
 
         // Returns the number of cams & front/back face device name
         Log.i(LOG_TAG,"local video code");
-        int camNumber = VideoCapturerAndroid.getDeviceCount();
-        String frontFacingCam = VideoCapturerAndroid.getNameOfFrontFacingDevice();
-        String backFacingCam = VideoCapturerAndroid.getNameOfBackFacingDevice();
+//        int camNumber = VideoCapturerAndroid. getDeviceCount();
+        String frontFacingCam = getNameOfFrontFacingDevice();
 
 
         // Creates a VideoCapturerAndroid instance for the device name
@@ -146,8 +146,8 @@ public class VideoChatActivity extends ListActivity {
 
         // Now that VideoRendererGui is ready, we can get our VideoRenderer.
         // IN THIS ORDER. Effects which is on top or bottom
-        remoteRender = VideoRendererGui.create(0, 0, 100, 100, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, false);
-        localRender = VideoRendererGui.create(0, 0, 100, 100, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, true);
+        remoteRender = VideoRendererGui.create(0, 0, 100, 100, RendererCommon.ScalingType.SCALE_ASPECT_FILL, false);
+        localRender = VideoRendererGui.create(0, 0, 100, 100, RendererCommon.ScalingType.SCALE_ASPECT_FILL, true);
 
         // We start out with an empty MediaStream object, created with help from our PeerConnectionFactory
         //  Note that LOCAL_MEDIA_STREAM_ID can be any string
@@ -372,6 +372,27 @@ public class VideoChatActivity extends ListActivity {
         mChatEditText.setText("");
     }
 
+    //importando do webrtc-client sample
+    public String getNameOfFrontFacingDevice() {
+        for (int i = 0; i < Camera.getNumberOfCameras(); ++i) {
+            Camera.CameraInfo info = new Camera.CameraInfo();
+            Camera.getCameraInfo(i, info);
+            if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT)
+                return getDeviceName(i);
+        }
+        throw new RuntimeException("Front facing camera does not exist.");
+    }
+
+    //importando do webrtc-client sample
+    public static String getDeviceName(int index) {
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(index, info);
+        String facing =
+                (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) ? "front" : "back";
+        return "Camera " + index + ", Facing " + facing
+                + ", Orientation " + info.orientation;
+    }
+
     /**
      * LogRTCListener is used for debugging purposes, it prints all RTC messages.
      * DemoRTC is just a Log Listener with the added functionality to append screens.
@@ -408,8 +429,8 @@ public class VideoChatActivity extends ListActivity {
                         if(remoteStream.audioTracks.size()==0 || remoteStream.videoTracks.size()==0) return;
                         mCallStatus.setVisibility(View.GONE);
                         remoteStream.videoTracks.get(0).addRenderer(new VideoRenderer(remoteRender));
-                        VideoRendererGui.update(remoteRender, 0, 0, 100, 100, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, false);
-                        VideoRendererGui.update(localRender, 72, 65, 25, 25, VideoRendererGui.ScalingType.SCALE_ASPECT_FIT, true);
+                        VideoRendererGui.update(remoteRender, 0, 0, 100, 100, RendererCommon.ScalingType.SCALE_ASPECT_FILL, false);
+                        VideoRendererGui.update(localRender, 72, 65, 25, 25, RendererCommon.ScalingType.SCALE_ASPECT_FILL, true);
                     }
                     catch (Exception e){ e.printStackTrace(); }
                 }
